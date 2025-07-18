@@ -14,6 +14,9 @@ import { Link, Redirect } from "expo-router";
 import MenIcon from "../../assets/images/man.png";
 import WomanIcon from "../../assets/images/woman.png";
 import { auth } from "../../firebase/config";
+import { getProfile, ProfileType } from "../../func/profile";
+import { useAuth } from "../../hooks/useAuth";
+
 // Valid FontAwesome icon names only
 type FontAwesomeIconName = NonNullable<
   ComponentProps<typeof FontAwesome>["name"]
@@ -35,20 +38,23 @@ const ProfileItem = ({ name, label, onPress }: ProfileItemProps) => (
 );
 
 const ProfileScreen = () => {
+  const { user: authUser } = useAuth();
   const [loggedOut, setLoggedOut] = useState(false);
-  const [user, setUser] = useState({
-    name: "Seif Ebeid",
-    email: "seif.amr.ebeid@email.com",
-    gender: "male",
-    birthday: "2005-06-02",
-  });
-
-  const avatar = user.gender === "male" ? MenIcon : WomanIcon;
+  const [user, setUser] = useState<ProfileType | null>(null);
 
   useEffect(() => {
-    const fetchUserData = async () => {};
+    const fetchUserData = async () => {
+      if (authUser) {
+        const profileData = await getProfile(authUser.uid);
+        if (profileData) {
+          setUser(profileData);
+        }
+      }
+    };
     fetchUserData();
-  }, []);
+  }, [authUser]);
+
+  const avatar = user?.gender === "male" ? MenIcon : WomanIcon;
 
   const Logout = async () => {
     try {
@@ -72,12 +78,16 @@ const ProfileScreen = () => {
             <Text style={styles.title}>Profile</Text>
           </View>
           {/* Avatar & Info */}
-          <View style={styles.profileSection}>
-            <Image source={avatar} style={styles.avatar} />
-            <Text style={styles.name}>{user.name}</Text>
-            <Text style={styles.email}>{user.email}</Text>
-            <Text style={styles.birthday}>{user.birthday}</Text>
-          </View>
+          {user ? (
+            <View style={styles.profileSection}>
+              <Image source={avatar} style={styles.avatar} />
+              <Text style={styles.name}>{user.name}</Text>
+              <Text style={styles.email}>{user.email}</Text>
+              <Text style={styles.birthday}>{user.birthday}</Text>
+            </View>
+          ) : (
+            <Text>Loading profile...</Text>
+          )}
           {/* Section: Account */}
           <Text style={styles.sectionTitle}>Account</Text>
           <ProfileItem name="user" label="View Profile" />

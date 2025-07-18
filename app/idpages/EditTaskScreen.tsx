@@ -8,83 +8,25 @@ import {
   Alert,
   SafeAreaView,
 } from "react-native";
-import { useRoute, useNavigation } from "@react-navigation/native";
-import { addTask } from "@/func/task";
-// Dummy data source (can be replaced with Firebase or Context)
-const dummyTasks = [
-  {
-    id: 1,
-    title: "Complete React Native Project",
-    description: "Finish the project by the end of the week.",
-    dueDate: "2023-10-15",
-    status: "In Progress",
-    icon: "list",
-  },
-  {
-    id: 2,
-    title: "Attend Team Meeting",
-    description: "Discuss project updates with the team.",
-    icon: "calendar",
-    dueDate: "2023-10-16",
-    status: "Pending",
-  },
-  {
-    id: 3,
-    title: "Submit Project Report",
-    description: "Prepare and submit the final report.",
-    dueDate: "2023-10-20",
-    status: "Not Started",
-    icon: "pencil",
-  },
-  {
-    id: 4,
-    title: "Review Code Changes",
-    description: "Review the latest code changes from the team.",
-    dueDate: "2023-10-18",
-    status: "In Progress",
-    icon: "list",
-  },
-  {
-    id: 5,
-    title: "Plan Next Sprint",
-    description: "Prepare for the next sprint planning meeting.",
-    dueDate: "2023-10-22",
-    status: "Pending",
-    icon: "calendar",
-  },
-  {
-    id: 6,
-    title: "Update Documentation",
-    description: "Ensure all documentation is up to date.",
-    dueDate: "2023-10-25",
-    status: "Not Started",
-    icon: "pencil",
-  },
-  {
-    id: 7,
-    title: "Fix Bugs",
-    description: "Address any bugs reported by users.",
-    dueDate: "2023-10-30",
-    status: "In Progress",
-    icon: "bug",
-  },
-];
+import { useRoute, useNavigation, useRouter } from "@react-navigation/native";
+import { addTask, getTask, updateTask, TaskType } from "../../func/task";
 
 const EditTaskScreen = () => {
   const route = useRoute();
+  const router = useRouter();
   const navigation = useNavigation();
-  const { taskId } = (route.params as { taskId: string }) || null;
-  const [task, setTask] = useState<any>(null);
-  console.log("Editing Task ID:", taskId);
+  const { taskId } = (route.params as { taskId?: string }) || {};
+  const [task, setTask] = useState<Omit<TaskType, "id"> | null>(null);
 
   useEffect(() => {
-    if (taskId) {
-      const foundTask = dummyTasks.find((t) => t.id === parseInt(taskId));
-      if (foundTask) {
-        setTask(foundTask);
+    const fetchTask = async () => {
+      if (taskId) {
+        const fetchedTask = await getTask(taskId);
+        if (fetchedTask) {
+          setTask(fetchedTask);
+        }
       } else {
         setTask({
-          id: parseInt(taskId),
           title: "",
           description: "",
           dueDate: "",
@@ -92,21 +34,29 @@ const EditTaskScreen = () => {
           icon: "pencil",
         });
       }
-    }
-  }, []);
+    };
+
+    fetchTask();
+  }, [taskId]);
 
   const handleSave = async () => {
-    Alert.alert("Task updated!");
-    try {
-      const data = await addTask(task);
-      console.log("Task saved:", data);
-    } catch (error) {
-      Alert.alert("Error updating task");
+    if (task) {
+      try {
+        if (taskId) {
+          await updateTask(taskId, task);
+          Alert.alert("Task updated!");
+        } else {
+          await addTask(task);
+          Alert.alert("Task created!");
+        }
+        router.back();
+      } catch (error) {
+        Alert.alert("Error saving task");
+      }
     }
-    navigation.goBack();
   };
 
-  if (!task && taskId) return <Text>Loading...</Text>;
+  if (!task) return <Text>Loading...</Text>;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -115,7 +65,7 @@ const EditTaskScreen = () => {
       </View>
       <View style={styles.container}>
         <Text style={styles.label}>
-          {taskId != "0" ? `Task #${taskId}` : "Create new Task"}
+          {taskId ? `Task #${taskId}` : "Create new Task"}
         </Text>
         <TextInput
           style={styles.input}
@@ -137,8 +87,8 @@ const EditTaskScreen = () => {
         />
         <TextInput
           style={styles.input}
-          value={"pending"}
-          editable={false}
+          value={task.status}
+          onChangeText={(text) => setTask({ ...task, status: text })}
           placeholder="Status"
         />
         <Button title="Save" onPress={handleSave} />

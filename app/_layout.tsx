@@ -5,14 +5,17 @@ import { useAuth } from "../hooks/useAuth";
 export default function RootLayout() {
   const { user, loading } = useAuth();
 
-  if (loading) return null; // or splash
-
-  const initialRoute = user ? "(main)" : "(auth)";
+  if (loading) {
+    return null; // or a splash screen
+  }
 
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-      <Stack.Screen name="(main)" options={{ headerShown: false }} />
+    <Stack
+      screenOptions={{ headerShown: false }}
+      initialRouteName={user ? "(auth)" : "(main)"}
+    >
+      <Stack.Screen name="(auth)" />
+      <Stack.Screen name="(main)" />
     </Stack>
   );
 }

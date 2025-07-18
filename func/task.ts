@@ -45,6 +45,22 @@ export const fetchTasks = async (): Promise<TaskType[]> => {
   }
 };
 
+// Fetch a single task by id
+export const getTask = async (id: string): Promise<TaskType | null> => {
+  try {
+    const taskRef = doc(db, "tasks", id);
+    const taskSnap = await getDoc(taskRef);
+    if (taskSnap.exists()) {
+      return { id: taskSnap.id, ...taskSnap.data() } as TaskType;
+    } else {
+      return null;
+    }
+  } catch (error) {
+    console.error("Error fetching task: ", error);
+    throw error;
+  }
+};
+
 // Add a new task
 export const addTask = async (task: Omit<TaskType, "id">) => {
   try {
