@@ -2,16 +2,26 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
+import {
+  FIREBASE_API_KEY,
+  FIREBASE_AUTH_DOMAIN,
+  FIREBASE_DATABASE_URL,
+  FIREBASE_PROJECT_ID,
+  FIREBASE_STORAGE_BUCKET,
+  FIREBASE_MESSAGING_SENDER_ID,
+  FIREBASE_APP_ID,
+  FIREBASE_MEASUREMENT_ID,
+} from "../var";
+
 const firebaseConfig = {
-  apiKey: "AIzaSyAGcwiKHZcO38Aayw3LruFjraSj36mboD0",
-  authDomain: "gamefordrawing.firebaseapp.com",
-  databaseURL:
-    "https://gamefordrawing-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "gamefordrawing",
-  storageBucket: "gamefordrawing.firebasestorage.app",
-  messagingSenderId: "634189758781",
-  appId: "1:634189758781:web:88b03f79e1ee4f88cf8554",
-  measurementId: "G-9HHXTH3FGE",
+  apiKey: FIREBASE_API_KEY,
+  authDomain: FIREBASE_AUTH_DOMAIN,
+  databaseURL: FIREBASE_DATABASE_URL,
+  projectId: FIREBASE_PROJECT_ID,
+  storageBucket: FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: FIREBASE_MESSAGING_SENDER_ID,
+  appId: FIREBASE_APP_ID,
+  measurementId: FIREBASE_MEASUREMENT_ID,
 };
 
 // Initialize Firebase
